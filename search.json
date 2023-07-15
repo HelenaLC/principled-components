@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "01-analysis-Zheng17.html",
+    "href": "01-analysis-Zheng17.html",
+    "title": "PCR",
+    "section": "",
+    "text": "library(dplyr)\nlibrary(scran)\nlibrary(scater)\nlibrary(ggplot2)\nlibrary(patchwork)\n\n\nsource(\"utils.R\")\n\n\n\n\n\n(sce <- readRDS(\"outs/Zheng17.rds\"))\n\nclass: SingleCellExperiment \ndim: 32738 68579 \nmetadata(0):\nassays(2): counts logcounts\nrownames(32738): ENSG00000243485 ENSG00000237613 ... ENSG00000215616\n  ENSG00000215611\nrowData names(4): ENSEMBL_ID Symbol_TENx Symbol hvg\ncolnames: NULL\ncolData names(13): Sample Barcode ... cluster sizeFactor\nreducedDimNames(2): TSNE PCA\nmainExpName: NULL\naltExpNames(0):\n\n\n\n\n\n\npcr <- .pcr(sce, id = \"cluster\", dr = \"PCA\", nd = 20)\ncha <- .cha(sce, id = \"cluster\", dr = \"PCA\", nd = 20)\n\n\n\n\n\n.plot_r2(pcr)\n\n\n\n\n\n.plot_ch(cha, x = \"nd\")\n\n\n\n\n\n# same thing but different (one line per PC)\n# should probably scale this according to\n# how important PCs really are or something...\n# still useful though, i.e., the messy clusters pop up \n# across all PCs under consideration, so that's nice...\n.plot_ch(cha, x = \"group\")\n\n\n\n\nCloser look at PC4… though CD34+ are split everywhere (that I looked).\n\n.plot_dr(sce, nd = c(4, 1)) +\n  geom_density2d(col = \"black\")"
+  },
+  {
+    "objectID": "01-analysis-Kang18.html",
+    "href": "01-analysis-Kang18.html",
+    "title": "PCR",
+    "section": "",
+    "text": "library(dplyr)\nlibrary(scran)\nlibrary(scater)\nlibrary(ggplot2)\nlibrary(patchwork)\n\n\nsource(\"utils.R\")\n\n\n\n\n\n(sce <- readRDS(\"outs/Kang18.rds\"))\n\nclass: SingleCellExperiment \ndim: 35635 12315 \nmetadata(0):\nassays(2): counts logcounts\nrownames(35635): MIR1302-10 FAM138A ... MT-ND6 MT-CYB\nrowData names(3): ENSEMBL SYMBOL hvg\ncolnames: NULL\ncolData names(3): cluster batch sizeFactor\nreducedDimNames(2): TSNE PCA\nmainExpName: NULL\naltExpNames(0):\n\n\n\n\n\n\n# pairs of dimension reduction & categories\n# to use for principal component regression\nnames(dr) <- dr <- c(\"PCA\")\nnames(id) <- id <- c(\"batch\", \"cluster\")\ndf <- expand.grid(dr = dr, id = id)\n\n\npcr <- mapply(\n  SIMPLIFY = FALSE,\n  dr = df$dr, id = df$id,\n  \\(dr, id) .pcr(sce, id, dr)) |>\n  do.call(what = rbind) |>\n  `rownames<-`(NULL)\nhead(pcr)\n\n     id  dr  nd         r2         pv       r2pv\n1 batch PCA PC1 0.04531375 15.7184821 0.71226333\n2 batch PCA PC2 0.05288043  2.7946178 0.14778058\n3 batch PCA PC3 0.02367575  1.9401233 0.04593388\n4 batch PCA PC4 0.02458710  1.5769556 0.03877276\n5 batch PCA PC5 0.04572454  0.8855728 0.04049241\n6 batch PCA PC6 0.02589801  0.7876940 0.02039971\n\n\n\ncha <- mapply(\n  SIMPLIFY = FALSE,\n  dr = df$dr, id = df$id,\n  \\(dr, id) .cha(sce, id, dr)) |>\n  do.call(what = rbind) |>\n  `rownames<-`(NULL)\nhead(cha)\n\n   dr    id group  nd     area\n1 PCA batch   101 PC2 9.239007\n2 PCA batch   101 PC3 9.428966\n3 PCA batch   101 PC4 9.720581\n4 PCA batch   101 PC5 8.241781\n5 PCA batch   101 PC6 6.891452\n6 PCA batch   101 PC7 7.162336\n\n\n\n\n\n\n.plot_r2(pcr)\n\n\n\n\n\n.plot_ch(cha, x = \"nd\")\n\n\n\n\n\n.plot_ch(cha, x = \"group\")\n\n\n\n\n\n# indeed, megakaryocytes are \n# all over the place in all PCs\nsub <- sce[, sce$cluster == \"Megakaryocytes\"]\nlapply(seq(2, 13), \\(.) {\n  .plot_dr(sub, id = NULL, nd = c(., 1)) + \n  geom_density2d(col = \"black\")\n}) |> wrap_plots(nrow = 3)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "PCR",
+    "section": "",
+    "text": "Contents\n\nKang18:\n\nsource\n12,315 cells\n8 clusters\n8 biological batches (patients)\n\nMereu20:\n\nsource\n20,237 cells\n9 clusters\n12 technical batches (technologies)\n\nZheng17:\n\nsource\n68,579 cells\n11 clusters\nno batches\n\nall datasets contain PBMCs"
+  }
+]
