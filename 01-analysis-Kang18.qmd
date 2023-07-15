@@ -1,0 +1,80 @@
+# Kang18
+
+## Preamble
+
+```{r}
+#| label: load-libs
+library(dplyr)
+library(scran)
+library(scater)
+library(ggplot2)
+library(patchwork)
+```
+
+```{r}
+#| label: utils
+source("utils.R")
+```
+
+## Load data
+
+```{r}
+#| label: load-data
+(sce <- readRDS("outs/Kang18.rds"))
+```
+
+## Analysis
+
+```{r}
+# pairs of dimension reduction & categories
+# to use for principal component regression
+names(dr) <- dr <- c("PCA")
+names(id) <- id <- c("batch", "cluster")
+df <- expand.grid(dr = dr, id = id)
+```
+
+```{r}
+#| label: calc-pcr
+pcr <- mapply(
+  SIMPLIFY = FALSE,
+  dr = df$dr, id = df$id,
+  \(dr, id) .pcr(sce, id, dr)) |>
+  do.call(what = rbind) |>
+  `rownames<-`(NULL)
+head(pcr)
+```
+
+```{r}
+#| label: calc-cha
+cha <- mapply(
+  SIMPLIFY = FALSE,
+  dr = df$dr, id = df$id,
+  \(dr, id) .cha(sce, id, dr)) |>
+  do.call(what = rbind) |>
+  `rownames<-`(NULL)
+head(cha)
+```
+
+## Visualization
+
+```{r fig.width = 5, fig.height = 3}
+.plot_r2(pcr)
+```
+
+```{r fig.width = 10, fig.height = 3}
+.plot_ch(cha, x = "nd")
+```
+
+```{r fig.width = 8, fig.height = 3}
+.plot_ch(cha, x = "group")
+```
+
+```{r fig.width = 7, fig.height = 5}
+# indeed, megakaryocytes are 
+# all over the place in all PCs
+sub <- sce[, sce$cluster == "Megakaryocytes"]
+lapply(seq(2, 13), \(.) {
+  .plot_dr(sub, id = NULL, nd = c(., 1)) + 
+  geom_density2d(col = "black")
+}) |> wrap_plots(nrow = 3)
+```

@@ -1,0 +1,21 @@
+# Contents
+  
+- Kang18:
+  - [source](https://doi.org/10.1038/nbt.4042)
+  - 12,315 cells
+  - 8 clusters
+  - 8 biological batches (patients)
+
+- Mereu20:
+  - [source](https://doi.org/10.1038/s41587-020-0469-4)
+  - 20,237 cells
+  - 9 clusters
+  - 12 technical batches (technologies)
+  
+- Zheng17:
+  - [source](https://doi.org/10.1038/ncomms14049)
+  - 68,579 cells
+  - 11 clusters
+  - no batches
+  
+- all datasets contain PBMCs

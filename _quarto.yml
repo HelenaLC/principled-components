@@ -1,0 +1,33 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "*.qmd"
+    - "!stash/"
+
+execute: 
+  cache: false
+  message: false
+  warning: false
+
+format:
+  html:
+    theme: lux
+    toc: true
+
+website:
+  title: "PCR"
+  navbar:
+    search: false
+    left:
+      - href: index.qmd
+      - text: Setup
+        menu:
+          - file: 00-setup-Kang18.qmd
+          - file: 00-setup-Mereu20.qmd
+          - file: 00-setup-Zheng17.qmd
+      - text: Analysis
+        menu:
+          - file: 01-analysis-Kang18.qmd
+          - file: 01-analysis-Mereu20.qmd
+          - file: 01-analysis-Zheng17.qmd

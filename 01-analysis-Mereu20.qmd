@@ -1,0 +1,104 @@
+# Mereu20
+
+## Preamble
+
+```{r}
+#| label: load-libs
+library(dplyr)
+library(scran)
+library(scater)
+library(ggplot2)
+library(patchwork)
+```
+
+```{r}
+#| label: utils
+source("utils.R")
+```
+
+## Load data
+
+```{r}
+#| label: load-data
+(sce <- readRDS("outs/Mereu20.rds"))
+```
+
+## Analysis
+
+```{r}
+# pairs of dimension reduction & categories
+# to use for principal component regression
+names(dr) <- dr <- c("PCA", "HARMONY")
+names(id) <- id <- c("batch", "cluster")
+df <- expand.grid(dr = dr, id = id)
+```
+
+```{r}
+#| label: calc-pcr
+pcr <- mapply(
+  SIMPLIFY = FALSE,
+  dr = df$dr, id = df$id,
+  \(dr, id) .pcr(sce, id, dr)) |>
+  do.call(what = rbind) |>
+  `rownames<-`(NULL)
+head(pcr)
+```
+
+```{r}
+#| label: calc-cha
+cha <- mapply(
+  SIMPLIFY = FALSE,
+  dr = df$dr, id = df$id,
+  \(dr, id) .cha(sce, id, dr)) |>
+  do.call(what = rbind) |>
+  `rownames<-`(NULL)
+head(cha)
+```
+
+```{r fig.width = 9, fig.height = 3}
+#| label: plot-r2
+.plot_r2(pcr)
+```
+
+```{r fig.width = 9, fig.height = 5}
+#| label: plot-ch
+.plot_ch(cha, ncol = 1)
+```
+
+Closer look at PC7...
+
+```{r}
+#| label: plot-pcs
+.plot_dr(sce, dr = "HARMONY", nd = c(7, 1))
+```
+
+Let's subset the B cell outliers...
+
+```{r}
+#| label: hvg-bcs
+# top variable genes within B cells
+pcs <- reducedDim(sce, "HARMONY")
+bcs <- sce$cluster == "B cells"
+pc7 <- pcs[, 7] > 10
+sub <- sce[, bcs]
+y <- logcounts(sub)
+sds <- rowSds(y)
+avg <- rowMeans(y)
+o <- order(sds, decreasing = TRUE)
+rownames(sce)[head(o, 20)]
+```
+
+```{r fig.width = 4, fig.height = 3}
+# in principle, could then do some DEA to figure out
+# which genes are being expressed in each subpopulation...
+ids <- reducedDim(sub, "HARMONY")[, 7] > 10
+mgs <- findMarkers(sub, ids, direct = "up")[[2]]
+rownames(mgs)[mgs$Top <= 20]
+```
+
+## Appendix
+
+```{r}
+#| label: save-data
+
+```

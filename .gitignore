@@ -1,0 +1,13 @@
+.Rproj.user
+.Ruserdata
+.Rhistory
+.RData
+
+/docs/
+/.quarto/
+
+*html
+/outs/*rds
+
+*_files/
+*_cache/

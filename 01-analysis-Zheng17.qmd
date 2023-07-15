@@ -1,0 +1,58 @@
+# Zheng17
+
+## Preamble
+
+```{r}
+#| label: load-libs
+library(dplyr)
+library(scran)
+library(scater)
+library(ggplot2)
+library(patchwork)
+```
+
+```{r}
+#| label: utils
+source("utils.R")
+```
+
+## Load data
+
+```{r}
+#| label: load-data
+(sce <- readRDS("outs/Zheng17.rds"))
+```
+
+## Analysis
+
+```{r}
+#| label: analysis
+pcr <- .pcr(sce, id = "cluster", dr = "PCA", nd = 20)
+cha <- .cha(sce, id = "cluster", dr = "PCA", nd = 20)
+```
+
+## Visualization
+
+```{r fig.width = 5, fig.height = 3}
+.plot_r2(pcr)
+```
+
+```{r fig.width = 7, fig.height = 3}
+.plot_ch(cha, x = "nd")
+```
+
+```{r fig.width = 5, fig.height = 4}
+# same thing but different (one line per PC)
+# should probably scale this according to
+# how important PCs really are or something...
+# still useful though, i.e., the messy clusters pop up 
+# across all PCs under consideration, so that's nice...
+.plot_ch(cha, x = "group")
+```
+
+Closer look at PC4... though CD34+ are split everywhere (that I looked).
+
+```{r fig.width = 8, fig.height = 5}
+.plot_dr(sce, nd = c(4, 1)) +
+  geom_density2d(col = "black")
+```

@@ -1,0 +1,67 @@
+# Zheng17
+
+## Preamble
+
+```{r}
+#| label: load-libs
+library(scran)
+library(scater)
+library(patchwork)
+library(TENxPBMCData)
+library(SingleCellExperiment)
+```
+
+## Load data
+
+```{r}
+#| label: load-data
+sce <- TENxPBMCData("pbmc68k")
+url <- paste0("https://github.com/10XGenomics/single-cell-3prime-paper/",
+  "raw/master/pbmc68k_analysis/68k_pbmc_barcodes_annotation.tsv")
+dir <- tempdir()
+fnm <- file.path(dir, "foo.tsv")
+download.file(url, fnm, quiet = TRUE)
+md <- read.delim(fnm)
+```
+
+## Wrangling
+
+```{r}
+# store origin t-SNE
+tsne <- md[, grep("^TSNE", names(md))]
+names(tsne) <- gsub("\\.", "", names(tsne))
+reducedDim(sce, "TSNE") <- as.matrix(tsne)
+# set annotations
+sce$cluster <- md$celltype
+# tabulate cell counts
+table(sce$cluster)
+```
+
+```{r}
+# basic feature selection & PCA
+sce <- logNormCounts(sce)
+tbl <- modelGeneVar(sce)
+hvg <- rowData(sce)$hvg <- tbl$bio > 0
+sce <- runPCA(sce, subset_row = hvg)
+```
+
+```{r}
+#| label: plot-thm
+thm <- list(
+  theme(aspect.ratio = 1, legend.key.size = unit(0.5, "lines")),
+  guides(col = guide_legend(override.aes = list(alpha = 1, size = 2))))
+```
+
+```{r fig.width = 10, fig.height = 4}
+#| label: plot-dr
+plotReducedDim(sce, "PCA", colour_by = "cluster", point_size = 0.1) +
+plotReducedDim(sce, "TSNE", colour_by = "cluster", point_size = 0.1) +
+plot_layout(guides = "collect") & thm
+```
+
+## Appendix
+
+```{r}
+#| label: save-data
+saveRDS(sce, "outs/Zheng17.rds")
+```
