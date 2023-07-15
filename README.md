@@ -1,4 +1,4 @@
-site is deployed at [https://helenalc.github.io/principled-components]()
+site is deployed at [https://helenalc.github.io/principled-components](https://helenalc.github.io/principled-components)
 
 # Food for thought
 
