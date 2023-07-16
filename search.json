@@ -47,5 +47,12 @@
     "title": "PCR",
     "section": "",
     "text": "Contents\n\nKang18:\n\nsource\n12,315 cells\n8 clusters\n8 biological batches (patients)\n\nMereu20:\n\nsource\n20,237 cells\n9 clusters\n12 technical batches (technologies)\n\nZheng17:\n\nsource\n68,579 cells\n11 clusters\nno batches\n\nall datasets contain PBMCs"
+  },
+  {
+    "objectID": "09-exploratory.html",
+    "href": "09-exploratory.html",
+    "title": "PCR",
+    "section": "",
+    "text": "library(sp)\nlibrary(mvtnorm)\n\n\n\n\n\n# simulate bivariate normal with\n# increasing n and all else constant\nns <- round(10^seq(2, 5, l = 100))\nxy <- lapply(ns, rmvnorm, numeric(2))\n# one example...\nplot(xy[[50]], cex = 0.5, lwd = 0.5)\n\n\n\n\n\n# convex hull areas\nas <- mapply(\n  xy = xy, ch = lapply(xy, chull),\n  \\(xy, ch) Polygon(xy[ch, ], TRUE)@area)\n# standard deviations\n# (assuming x were PC1)\nsd <- sapply(xy, \\(.) sd(.[, 2]))\n\n\n# shifting along y for joint visualization\nplot(ns, as, type = \"l\", ylim = c(0, 80),\n  xlab = \"# points\", ylab = \"convex hull area\")\n# jup, as RG pointed out, these are independent of n\nlines(ns, sd+mean(as)/2, col = \"blue\")\n# except for very small scaling by 1/√n seems to work\nlines(ns, as/sqrt(ns)+mean(as), col = \"red\")"
   }
 ]
