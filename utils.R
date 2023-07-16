@@ -7,18 +7,15 @@
 # principal component regression
 .pcr <- \(sce, id, dr = "PCA", nd = 20) {
   y <- reducedDim(sce, dr)
-  x <- sce[[id]]
   nd <- min(nd, ncol(y))
-  r2 <- apply(y[, seq_len(nd)], 2, \(.) 
-    summary(lm(. ~ x))$adj.r.squared)
-  nd <- names(r2)
-  nd <- factor(nd, nd)
-  df <- data.frame(
-    id, dr, nd, r2,
-    row.names = NULL)
+  z <- y[, seq_len(nd)]
+  l <- summary(lm(z ~ sce[[id]]))
+  r2 <- vapply(l, \(.) .$adj.r.squared, numeric(1))
+  nd <- factor(nd <- colnames(z), nd)
+  df <- data.frame(id, dr, nd, r2, row.names = NULL)
   pv <- attr(y, "percentVar")
   if (!is.null(pv)) {
-    names(pv) <- colnames(y)
+    names(pv) <- colnames(z)
     df$pv <- pv[df$nd]
     df$r2pv <- with(df, r2*pv)
   } else df$pv <- df$r2pv <- NA
