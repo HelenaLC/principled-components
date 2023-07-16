@@ -1,0 +1,44 @@
+# Exploratory
+
+## Preamble
+
+```{r}
+#| label: load-libs
+library(sp)
+library(mvtnorm)
+```
+
+## Convex hulls vs. SDs
+
+```{r}
+# simulate bivariate normal with
+# increasing n and all else constant
+ns <- round(10^seq(2, 5, l = 100))
+xy <- lapply(ns, rmvnorm, numeric(2))
+# one example...
+plot(xy[[50]], cex = 0.5, lwd = 0.5)
+```
+
+```{r}
+# convex hull areas
+as <- mapply(
+  xy = xy, ch = lapply(xy, chull),
+  \(xy, ch) Polygon(xy[ch, ], TRUE)@area)
+# standard deviations
+# (assuming x were PC1)
+sd <- sapply(xy, \(.) sd(.[, 2]))
+```
+
+```{r}
+# shifting along y for joint visualization
+plot(ns, as, type = "l", ylim = c(0, 80),
+  xlab = "# points", ylab = "convex hull area")
+# jup, as RG pointed out, these are independent of n
+lines(ns, sd+mean(as)/2, col = "blue")
+# except for very small scaling by 1/√n seems to work
+lines(ns, as/sqrt(ns)+mean(as), col = "red")
+```
+
+```{r}
+
+```
